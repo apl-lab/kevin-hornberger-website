@@ -1,0 +1,41 @@
+# Decap CMS configuration
+# IMPORTANT: replace OWNER/REPO below with your GitHub account + repository name
+# once the repo is created (e.g. friends-of-hornberger/kevin-hornberger-website).
+
+backend:
+  name: github
+  repo: apl-lab/kevin-hornberger-website
+  branch: main
+
+# Where uploaded images are stored in the repo, and how they're referenced in posts.
+media_folder: "images/news"
+public_folder: "/images/news"
+
+# Show editorial workflow (Draft → In Review → Published) so posts can be saved before going live.
+publish_mode: editorial_workflow
+
+collections:
+  - name: "news"
+    label: "News & Updates"
+    label_singular: "News Post"
+    folder: "content/news"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{fields.slug}}"
+    preview_path: "news/{{fields.slug}}/"
+    sortable_fields: ["date", "title"]
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - label: "Categories"
+        name: "categories"
+        widget: "select"
+        multiple: true
+        options: ["News", "Updates"]
+        default: ["News"]
+      - label: "URL slug"
+        name: "slug"
+        widget: "string"
+        hint: "The web address part, lowercase with dashes — e.g. 2026-session-recap"
+      - { label: "Type", name: "type", widget: "hidden", default: "original" }
+      - { label: "Original URL (optional)", name: "original_url", widget: "string", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }

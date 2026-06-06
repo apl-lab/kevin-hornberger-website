@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ title }} — Kevin B. Hornberger, District 35B</title>
+{% if description %}<meta name="description" content="{{ description }}" />{% endif %}
+<link rel="canonical" href="https://kevinhornberger.org{{ page.url }}" />
+<link rel="icon" type="image/png" href="/images/cropped-mdflag_lg2.gif" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,700&family=Oswald:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+{% include "site-styles.css" %}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-brand"><img src="/images/logo.png" alt="Hornberger — Delegate 35B" style="height:64px; width:auto; display:block;" /></a>
+    <button class="nav-toggle" onclick="document.getElementById('navlinks').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+    <ul class="nav-links" id="navlinks">
+      <li><a href="/meet-kevin.html">Meet Kevin</a></li>
+      <li><a href="/issues.html">Issues</a></li>
+      <li><a href="/district-35b.html">District 35B</a></li>
+      <li><a href="/news/" class="active">News</a></li>
+      <li><a href="/index.html#join">Get Involved</a></li>
+      <li><a class="nav-donate" href="https://secure.anedot.com/friends-of-kevin-hornberger/donate" target="_blank" rel="noopener">Donate</a></li>
+    </ul>
+  </div>
+</nav>
+
+{{ content | safe }}
+
+<footer>
+  <div class="container">
+    <div class="footer-brand">KEVIN B. HORNBERGER</div>
+    <div>Maryland House of Delegates &middot; District 35B &middot; Cecil County</div>
+    <div class="footer-links">
+      <a href="/index.html">Home</a>
+      <a href="/meet-kevin.html">Meet Kevin</a>
+      <a href="/issues.html">Issues</a>
+      <a href="/district-35b.html">District 35B</a>
+      <a href="/news/">News</a>
+      <a href="mailto:kevin.b.hornberger@gmail.com">Email the Campaign</a>
+      <a href="/privacy-policy.html">Privacy Policy</a>
+      <a href="/terms-of-service.html">Terms</a>
+    </div>
+    <p class="footer-paid">&copy; <span id="yr"></span> Friends of Kevin Hornberger. All rights reserved.<br/>Paid for by Friends of Kevin Hornberger. Betty Stehman, CPA, Treasurer.</p>
+  </div>
+</footer>
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
