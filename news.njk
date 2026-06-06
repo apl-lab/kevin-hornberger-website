@@ -1,0 +1,27 @@
+---
+layout: base.njk
+permalink: /news/index.html
+title: News & Updates
+description: Latest news, legislative updates, and newsletters from Delegate Kevin B. Hornberger.
+---
+<section class="page-hero">
+  <div class="container">
+    <div class="kicker">From the Campaign &amp; the Capitol</div>
+    <h1>News &amp; Updates</h1>
+    <p>Legislative updates, session summaries, and news from Delegate Kevin B. Hornberger.</p>
+  </div>
+</section>
+<main>
+  <div class="container">
+    <div class="news-list">
+      {% for post in collections.news | reverse %}
+      <a class="news-item" href="{{ post.url }}">
+        <span class="news-date">{{ post.data.date | dateDisplay }}</span>
+        {%- if "Updates" in post.data.categories %}<span class="news-badges"><span class="news-badge updates">Update</span></span>{% endif %}
+        <h2>{{ post.data.title }}</h2>
+        <p class="news-excerpt">{{ post.templateContent | excerpt }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</main>

@@ -1,0 +1,13 @@
+{
+  "name": "kevin-hornberger-website",
+  "version": "1.0.0",
+  "description": "Campaign website for Kevin B. Hornberger, Maryland House of Delegates District 35B.",
+  "private": true,
+  "scripts": {
+    "build": "eleventy",
+    "start": "eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  }
+}
