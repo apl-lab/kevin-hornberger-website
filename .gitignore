@@ -1,0 +1,15 @@
+# Build output (Netlify regenerates this on every deploy)
+_site/
+
+# Dependencies
+node_modules/
+
+# OS / editor junk
+.DS_Store
+*.log
+
+# Internal working docs (kept locally, not part of the website)
+news-catalog.md
+news-archive-preview.html
+hornberger-images.zip
+hornberger-news-archive.zip
