@@ -57,7 +57,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const { firstName, lastName, email, phone, smsOptIn } = payload;
+  const { firstName, lastName, email, phone, zip, smsOptIn, interests } = payload;
 
   if (!email || !email.includes('@')) {
     return {
@@ -78,11 +78,21 @@ exports.handler = async (event) => {
     merge_fields.PHONE = phone.trim();
   }
 
+  // ZIP code (requires a "ZIP" merge field on the Mailchimp audience).
+  if (zip && String(zip).trim() !== '') {
+    merge_fields.ZIP = String(zip).trim();
+  }
+
+  // Interests the supporter selected become tags so the team can segment them.
+  const interestTags = Array.isArray(interests)
+    ? interests.map(t => String(t).trim()).filter(Boolean).slice(0, 25)
+    : [];
+
   const mailchimpBody = {
     email_address: email.trim(),
     status: 'subscribed',
     merge_fields,
-    tags: ['volunteer-lead', 'website-signup'],
+    tags: ['volunteer-lead', 'website-signup', ...interestTags],
   };
 
   const url = `https://${SERVER}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`;
