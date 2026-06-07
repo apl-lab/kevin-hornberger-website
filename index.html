@@ -691,6 +691,19 @@ section { padding: 100px 0; position: relative; }
 .btn-submit:hover { background: var(--c-rust); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(194, 104, 73, 0.3); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .form-disclaimer { font-size: 0.72rem; color: var(--c-stone); margin-top: 8px; line-height: 1.5; text-align: left; }
+/* Interest checklist ("How would you like to help?") */
+.help-list { border: 0; padding: 0; margin: 18px 0 4px; }
+.help-title { font-family: 'Oswald', system-ui, sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; color: var(--c-sage-deep); font-size: 1rem; padding: 0; }
+.help-sub { font-size: 0.8rem; color: var(--c-stone); margin: 2px 0 12px; }
+.help-item { display: flex; align-items: flex-start; gap: 11px; padding: 10px 12px; border: 1px solid rgba(18,32,76,0.14); border-radius: 4px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s, background .15s; font-size: 0.93rem; line-height: 1.35; }
+.help-item:hover { border-color: var(--c-rust); }
+.help-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 1px; flex-shrink: 0; accent-color: var(--c-rust); cursor: pointer; }
+.help-item:has(input:checked) { border-color: var(--c-rust); background: rgba(197,39,44,0.05); }
+.help-flash { animation: helpFlash 1.1s ease; }
+@keyframes helpFlash { 0%,100% { box-shadow: 0 0 0 0 rgba(197,39,44,0); } 30% { box-shadow: 0 0 0 4px rgba(197,39,44,0.25); } }
+/* Make interest action cards look clickable */
+.join-action[role="button"] { cursor: pointer; border: 1px solid transparent; }
+.join-action[role="button"]:hover { border-color: var(--c-rust); }
 .sms-opt-in {
   display: flex; align-items: flex-start; gap: 10px;
   cursor: pointer; margin-bottom: 10px;
@@ -1041,7 +1054,23 @@ h1 em, h2 em, h3 em { font-style: normal; color: var(--c-rust); }
           <input class="field" id="f-last" type="text" placeholder="Last Name" />
         </div>
         <input class="field field-full" id="f-email" type="email" placeholder="Email Address" style="margin-bottom:12px;" />
-        <input class="field field-full" id="f-phone" type="tel" placeholder="Mobile (optional)" style="margin-bottom:16px;" />
+        <div class="field-row">
+          <input class="field" id="f-phone" type="tel" placeholder="Mobile (optional)" />
+          <input class="field" id="f-zip" type="text" inputmode="numeric" placeholder="ZIP" />
+        </div>
+        <fieldset class="help-list" id="help-list">
+          <legend class="help-title">How would you like to help?</legend>
+          <p class="help-sub">Check every option that interests you &mdash; pick more than one.</p>
+          <label class="help-item"><input type="checkbox" data-tag="Yard sign" /> <span>I&rsquo;d like a yard sign</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Volunteer: phones/fundraising" /> <span>Volunteer &mdash; phone calls / fundraising</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Volunteer: event setup" /> <span>Volunteer &mdash; event setup</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Volunteer: door-knocking" /> <span>Volunteer &mdash; door-knocking in District 35B</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Volunteer: voter registration" /> <span>Volunteer &mdash; voter registration &amp; how-to-vote</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Host a meet-and-greet" /> <span>Host a meet-and-greet</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Help at a meet-and-greet" /> <span>Help with a meet-and-greet (not host)</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Attend events" /> <span>Come to events as they&rsquo;re scheduled</span></label>
+          <label class="help-item"><input type="checkbox" data-tag="Endorse" /> <span>Add my name as a public supporter</span></label>
+        </fieldset>
         <label class="sms-opt-in">
           <input type="checkbox" id="f-sms-opt-in" />
           <span class="sms-opt-label" id="sms-opt-label"></span>
@@ -1207,10 +1236,10 @@ const CANDIDATE = {
   joinHeading: "This seat is won <em>door to door.</em>",
   joinBody:    "There\u2019s a way for everyone to help \u2014 whether you have five minutes or five hours. Pick the one that fits your week.",
   joinActions: [
-    { icon: "\u270b", title: "Volunteer",           desc: "Knock doors, make calls, help at events.",        url: "mailto:kevin.b.hornberger@gmail.com?subject=I%20want%20to%20volunteer", external: false },
-    { icon: "\ud83e\udeb4", title: "Request a yard sign", desc: "Show your neighbors where you stand.",           url: "mailto:kevin.b.hornberger@gmail.com?subject=Yard%20sign%20request",     external: false },
-    { icon: "\ud83d\udce8", title: "Get email updates",   desc: "Session recaps and district news, no spam.",     url: "http://eepurl.com/hwTLy5",                                              external: true  },
-    { icon: "\ud83d\udc9a", title: "Chip in",             desc: "Every dollar funds a door knock or a postcard.", url: "https://secure.anedot.com/friends-of-kevin-hornberger/donate",          external: true  }
+    { icon: "\u270b", title: "Volunteer",            desc: "Knock doors, make calls, help at events.",                 checks: ["Volunteer: phones/fundraising","Volunteer: event setup","Volunteer: door-knocking","Volunteer: voter registration"] },
+    { icon: "\ud83e\udeb4", title: "Request a yard sign",  desc: "Show your neighbors where you stand.",                     checks: ["Yard sign"] },
+    { icon: "\ud83d\udc8c", title: "Host a meet-and-greet", desc: "Invite friends over \u2014 Kevin will bring the coffee.",    checks: ["Host a meet-and-greet"] },
+    { icon: "\ud83d\udc9a", title: "Chip in",              desc: "Every dollar funds a door knock or a postcard.",           url: "https://secure.anedot.com/friends-of-kevin-hornberger/donate", external: true }
   ],
 
   // ── Footer ────────────────────────────────────────────────────────────
@@ -1321,16 +1350,21 @@ const CANDIDATE = {
   $("join-heading").innerHTML = c.joinHeading;
   $("join-body").textContent = c.joinBody;
   $("join-actions").innerHTML = c.joinActions.map(a => {
-    const attrs = a.external ? 'target="_blank" rel="noopener"' : '';
-    return `
-      <a class="join-action" href="${a.url}" ${attrs}>
+    const inner = `
         <div class="join-action-icon">${a.icon}</div>
         <div class="join-action-text">
           <div class="join-action-title">${a.title}</div>
           <div class="join-action-desc">${a.desc}</div>
         </div>
-        <div class="join-action-arrow">→</div>
-      </a>`;
+        <div class="join-action-arrow">→</div>`;
+    if (a.checks) {
+      // Clicking the card checks the matching interest boxes on the form.
+      const tags = a.checks.map(t => t.replace(/"/g, "&quot;")).join("|");
+      return `<div class="join-action" role="button" tabindex="0" data-checks="${tags}"
+                onclick="pickInterest(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickInterest(this);}">${inner}</div>`;
+    }
+    const attrs = a.external ? 'target="_blank" rel="noopener"' : '';
+    return `<a class="join-action" href="${a.url}" ${attrs}>${inner}</a>`;
   }).join("");
   // ── Footer ───────────────────────────────────────────────────────────────
   $("footer-cta-heading").innerHTML = c.footerCtaHeading;
@@ -1390,6 +1424,21 @@ const CANDIDATE = {
   $("donate-sticky").href = c.donateUrl;
 })();
 /* ── Signup form → Netlify Function → Mailchimp ───────────────────────── */
+/* Clicking a "Get Involved" card ticks the matching interest boxes on the form. */
+function pickInterest(card) {
+  const tags = (card.getAttribute("data-checks") || "").split("|").filter(Boolean);
+  const list = document.getElementById("help-list");
+  if (!list) return;
+  tags.forEach(t => {
+    const cb = list.querySelector('input[type="checkbox"][data-tag="' + t + '"]');
+    if (cb) {
+      cb.checked = true;
+      const item = cb.closest(".help-item");
+      if (item) { item.classList.remove("help-flash"); void item.offsetWidth; item.classList.add("help-flash"); }
+    }
+  });
+  list.scrollIntoView({ behavior: "smooth", block: "center" });
+}
 async function handleSignup() {
   const $ = id => document.getElementById(id);
   const c = CANDIDATE;
@@ -1402,7 +1451,10 @@ async function handleSignup() {
   }
   const last     = $("f-last").value.trim();
   const phone    = $("f-phone").value.trim();
+  const zip      = ($("f-zip") ? $("f-zip").value.trim() : "");
   const smsOptIn = $("f-sms-opt-in").checked;
+  const interests = [...document.querySelectorAll('#help-list input[type="checkbox"]:checked')]
+                      .map(cb => cb.getAttribute("data-tag"));
   const btn = $("signup-btn");
   const originalLabel = btn.textContent;
   btn.disabled = true;
@@ -1423,7 +1475,9 @@ async function handleSignup() {
         lastName:  last,
         email:     email,
         phone:     phone,
-        smsOptIn:  smsOptIn
+        zip:       zip,
+        smsOptIn:  smsOptIn,
+        interests: interests
       })
     });
     const data = await response.json().catch(() => ({}));
