@@ -73,14 +73,18 @@ exports.handler = async (event) => {
     LNAME: (lastName  || '').trim(),
   };
 
-  // Only attach phone when the user opted in to SMS AND provided one.
-  if (smsOptIn && phone && phone.trim() !== '') {
-    merge_fields.PHONE = phone.trim();
+  // ZIP code → the audience's existing "Zip" field (merge tag MMERGE3).
+  if (zip && String(zip).trim() !== '') {
+    merge_fields.MMERGE3 = String(zip).trim();
   }
 
-  // ZIP code (requires a "ZIP" merge field on the Mailchimp audience).
-  if (zip && String(zip).trim() !== '') {
-    merge_fields.ZIP = String(zip).trim();
+  // Phone: the audience currently has no PHONE merge field, so we capture the
+  // opt-in intent as a tag rather than risk a failed signup. (Add a PHONE field
+  // in Mailchimp later to store the number itself for SMS.)
+  const phoneTags = [];
+  if (smsOptIn) {
+    phoneTags.push('sms-opt-in');
+    if (phone && phone.trim() !== '') phoneTags.push('phone: ' + phone.trim());
   }
 
   // Interests the supporter selected become tags so the team can segment them.
@@ -92,7 +96,7 @@ exports.handler = async (event) => {
     email_address: email.trim(),
     status: 'subscribed',
     merge_fields,
-    tags: ['volunteer-lead', 'website-signup', ...interestTags],
+    tags: ['volunteer-lead', 'website-signup', ...interestTags, ...phoneTags],
   };
 
   const url = `https://${SERVER}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`;
