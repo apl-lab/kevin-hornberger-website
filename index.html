@@ -704,6 +704,19 @@ section { padding: 100px 0; position: relative; }
 /* Make interest action cards look clickable */
 .join-action[role="button"] { cursor: pointer; border: 1px solid transparent; }
 .join-action[role="button"]:hover { border-color: var(--c-rust); }
+/* Email-capture pop-up */
+.email-modal { position: fixed; inset: 0; z-index: 1000; display: none; }
+.email-modal.open { display: block; }
+.email-modal-backdrop { position: absolute; inset: 0; background: rgba(11,23,51,0.6); }
+.email-modal-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(420px, 92vw); background: var(--c-cream); border-radius: 8px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.45); animation: emPop .25s ease; }
+@keyframes emPop { from { opacity: 0; transform: translate(-50%,-46%); } to { opacity: 1; transform: translate(-50%,-50%); } }
+.email-modal-top { background: var(--c-sage-deep); text-align: center; padding: 24px 0 18px; }
+.em-crab { font-size: 3.2rem; line-height: 1; }
+.email-modal-body { padding: 26px 30px 30px; text-align: center; }
+.email-modal-body h3 { font-family: 'Oswald', system-ui, sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--c-sage-deep); font-size: 1.5rem; margin-bottom: 8px; }
+.email-modal-body p { color: var(--c-stone); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.5; }
+.email-modal-close { position: absolute; top: 10px; right: 12px; z-index: 2; background: rgba(255,255,255,0.22); border: 0; color: #fff; font-size: 1.5rem; line-height: 30px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+.email-modal-close:hover { background: rgba(255,255,255,0.38); }
 .sms-opt-in {
   display: flex; align-items: flex-start; gap: 10px;
   cursor: pointer; margin-bottom: 10px;
@@ -1135,6 +1148,23 @@ h1 em, h2 em, h3 em { font-style: normal; color: var(--c-rust); }
   <span id="sticky-label">Support the Campaign</span>
   <span>→</span>
 </a>
+<!-- Email-capture pop-up -->
+<div id="email-modal" class="email-modal" aria-hidden="true">
+  <div class="email-modal-backdrop" onclick="closeEmailModal()"></div>
+  <div class="email-modal-card" role="dialog" aria-modal="true" aria-labelledby="em-title">
+    <button class="email-modal-close" onclick="closeEmailModal()" aria-label="Close">&times;</button>
+    <div class="email-modal-top"><span class="em-crab">🦀</span></div>
+    <div class="calvert"></div>
+    <div class="email-modal-body">
+      <h3 id="em-title">Keep up with the campaign</h3>
+      <p>Session recaps and District 35B news, straight from Kevin. No spam, ever.</p>
+      <input class="field field-full" id="em-first" type="text" placeholder="First Name" style="margin-bottom:10px;" />
+      <input class="field field-full" id="em-email" type="email" placeholder="Email Address" />
+      <button class="btn-submit" id="em-btn" onclick="submitEmailModal()">Count Me In &rarr;</button>
+      <p class="form-disclaimer" id="em-msg" style="text-align:center;"></p>
+    </div>
+  </div>
+</div>
 <script>
 /* ==================================================================== */
 /* =====================  CONFIG: CONTENT  ============================ */
@@ -1524,6 +1554,69 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.12 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ── Email-capture pop-up (delayed / on scroll, once per 30 days) ───────── */
+(function emailPopup() {
+  const KEY = "hbEmailPopup";
+  function recentlyHandled() {
+    try { const v = localStorage.getItem(KEY); return v && (Date.now() - parseInt(v, 10)) < 30 * 864e5; }
+    catch (e) { return false; }
+  }
+  function remember() { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} }
+  let shown = false;
+  function show() {
+    if (shown || recentlyHandled()) return;
+    shown = true;
+    const m = document.getElementById("email-modal");
+    m.classList.add("open");
+    m.setAttribute("aria-hidden", "false");
+    const f = document.getElementById("em-first");
+    if (f) setTimeout(() => f.focus(), 120);
+  }
+  window.closeEmailModal = function () {
+    const m = document.getElementById("email-modal");
+    m.classList.remove("open");
+    m.setAttribute("aria-hidden", "true");
+    remember();
+  };
+  window.submitEmailModal = async function () {
+    const first = document.getElementById("em-first").value.trim();
+    const email = document.getElementById("em-email").value.trim();
+    const msg = document.getElementById("em-msg");
+    if (!email || !email.includes("@")) {
+      msg.style.color = "var(--c-rust)"; msg.textContent = "Please enter a valid email address.";
+      document.getElementById("em-email").focus(); return;
+    }
+    const btn = document.getElementById("em-btn");
+    btn.disabled = true; btn.textContent = "Sending…";
+    try {
+      const url = CANDIDATE.espUrl;
+      if (url) {
+        const r = await fetch(url, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName: first, email: email, interests: ["popup-signup"] })
+        });
+        if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || "Subscription failed."); }
+      }
+      remember();
+      document.querySelector(".email-modal-body").innerHTML =
+        '<h3 id="em-title">Thank you' + (first ? ", " + first : "") + '!</h3><p>You&rsquo;re on the list &mdash; welcome to the team.</p>';
+    } catch (err) {
+      btn.disabled = false; btn.textContent = "Count Me In →";
+      msg.style.color = "var(--c-rust)"; msg.textContent = err.message || "Something went wrong. Please try again.";
+    }
+  };
+  if (!recentlyHandled()) {
+    setTimeout(show, 12000);
+    const onScroll = () => {
+      if ((window.scrollY + window.innerHeight) >= document.body.scrollHeight * 0.5) {
+        show(); window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeEmailModal(); });
+  }
+})();
 </script>
 </body>
 </html>
