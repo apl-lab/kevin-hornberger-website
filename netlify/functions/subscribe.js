@@ -78,14 +78,13 @@ exports.handler = async (event) => {
     merge_fields.MMERGE3 = String(zip).trim();
   }
 
-  // Phone: the audience currently has no PHONE merge field, so we capture the
-  // opt-in intent as a tag rather than risk a failed signup. (Add a PHONE field
-  // in Mailchimp later to store the number itself for SMS.)
-  const phoneTags = [];
-  if (smsOptIn) {
-    phoneTags.push('sms-opt-in');
-    if (phone && phone.trim() !== '') phoneTags.push('phone: ' + phone.trim());
+  // Phone number → stored in the audience's PHONE merge field.
+  if (phone && phone.trim() !== '') {
+    merge_fields.PHONE = phone.trim();
   }
+  // Track SMS consent as a tag (we only text supporters who opted in).
+  const phoneTags = [];
+  if (smsOptIn) phoneTags.push('sms-opt-in');
 
   // Interests the supporter selected become tags so the team can segment them.
   const interestTags = Array.isArray(interests)
