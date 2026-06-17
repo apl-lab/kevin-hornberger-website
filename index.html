@@ -717,6 +717,23 @@ section { padding: 100px 0; position: relative; }
 .email-modal-body p { color: var(--c-stone); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.5; }
 .email-modal-close { position: absolute; top: 10px; right: 12px; z-index: 2; background: rgba(255,255,255,0.22); border: 0; color: #fff; font-size: 1.5rem; line-height: 30px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
 .email-modal-close:hover { background: rgba(255,255,255,0.38); }
+/* Endorsement carousel */
+.endorsements { background: var(--c-paper); padding: 72px 0; border-top: 1px solid rgba(42,38,34,0.06); }
+.endorsements .section-label { text-align: center; }
+.endorsements h2 { text-align: center; font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 30px; }
+.endorsements h2 em { font-style: italic; color: var(--c-rust); }
+.endorse-carousel { position: relative; max-width: 880px; margin: 0 auto; }
+.endorse-viewport { overflow: hidden; border-radius: 4px; box-shadow: 0 18px 50px rgba(18,32,76,0.18); border-top: 3px solid var(--c-rust); }
+.endorse-track { display: flex; transition: transform 0.5s ease; }
+.endorse-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; background: var(--c-sage-deep); }
+.endorse-slide img { width: 100%; height: auto; max-height: 520px; object-fit: contain; display: block; }
+.endorse-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 46px; height: 46px; border: 0; border-radius: 50%; background: rgba(11,23,51,0.66); color: #fff; font-size: 1.8rem; line-height: 46px; cursor: pointer; transition: background 0.2s; }
+.endorse-arrow:hover { background: var(--c-rust); }
+.endorse-arrow.prev { left: 12px; } .endorse-arrow.next { right: 12px; }
+.endorse-dots { display: flex; justify-content: center; gap: 9px; margin-top: 18px; }
+.endorse-dot { width: 11px; height: 11px; padding: 0; border: 0; border-radius: 50%; background: rgba(18,32,76,0.22); cursor: pointer; transition: background 0.2s; }
+.endorse-dot.active { background: var(--c-rust); }
+@media (max-width: 600px) { .endorse-arrow { width: 38px; height: 38px; line-height: 38px; font-size: 1.4rem; } }
 .sms-opt-in {
   display: flex; align-items: flex-start; gap: 10px;
   cursor: pointer; margin-bottom: 10px;
@@ -1050,6 +1067,26 @@ h1 em, h2 em, h3 em { font-style: normal; color: var(--c-rust); }
   </div>
 </section>
 <!-- JOIN -->
+<section class="endorsements reveal" id="endorsements">
+  <div class="container">
+    <div class="section-label">Endorsements</div>
+    <h2>Backed by leaders &amp; organizations across <em>Maryland</em>.</h2>
+    <div class="endorse-carousel" id="endorseCarousel" aria-roledescription="carousel" aria-label="Endorsements">
+      <div class="endorse-viewport">
+        <div class="endorse-track" id="endorseTrack">
+          <div class="endorse-slide"><img src="images/endorsements/ehrlich.jpg" alt="Delegate Kevin Hornberger — endorsed by Bob Ehrlich, 60th Governor of Maryland" /></div>
+          <div class="endorse-slide"><img src="images/endorsements/nra.jpg" alt="Delegate Kevin Hornberger — endorsed by the NRA, A Rating" loading="lazy" /></div>
+          <div class="endorse-slide"><img src="images/endorsements/firefighters.jpg" alt="Delegate Kevin Hornberger — endorsed by the Professional Fire Fighters of Maryland" loading="lazy" /></div>
+          <div class="endorse-slide"><img src="images/endorsements/sleola.jpg" alt="SLEOLA — State Law Enforcement Officers Labor Alliance — endorses Delegate Kevin Hornberger" loading="lazy" /></div>
+          <div class="endorse-slide"><img src="images/endorsements/right-to-life.jpg" alt="Delegate Kevin Hornberger — endorsed by Right to Life PAC of Maryland" loading="lazy" /></div>
+        </div>
+      </div>
+      <button class="endorse-arrow prev" id="endorsePrev" type="button" aria-label="Previous endorsement">&lsaquo;</button>
+      <button class="endorse-arrow next" id="endorseNext" type="button" aria-label="Next endorsement">&rsaquo;</button>
+      <div class="endorse-dots" id="endorseDots"></div>
+    </div>
+  </div>
+</section>
 <section class="join" id="join">
   <div class="container join-grid">
     <div class="join-pitch">
@@ -1554,6 +1591,47 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.12 });
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ── Endorsement carousel (auto-advance, arrows, dots, swipe, hover-pause) ── */
+(function endorseCarousel() {
+  const track = document.getElementById("endorseTrack");
+  if (!track) return;
+  const slides = [...track.children];
+  if (slides.length < 2) return;
+  const dotsWrap = document.getElementById("endorseDots");
+  let i = 0, timer = null;
+  slides.forEach((_, idx) => {
+    const d = document.createElement("button");
+    d.className = "endorse-dot" + (idx === 0 ? " active" : "");
+    d.type = "button";
+    d.setAttribute("aria-label", "Go to endorsement " + (idx + 1));
+    d.addEventListener("click", () => { go(idx); restart(); });
+    dotsWrap.appendChild(d);
+  });
+  const dots = [...dotsWrap.children];
+  function go(n) {
+    i = (n + slides.length) % slides.length;
+    track.style.transform = "translateX(-" + (i * 100) + "%)";
+    dots.forEach((d, k) => d.classList.toggle("active", k === i));
+  }
+  const next = () => go(i + 1), prev = () => go(i - 1);
+  function start() { timer = setInterval(next, 5500); }
+  function restart() { clearInterval(timer); start(); }
+  document.getElementById("endorseNext").addEventListener("click", () => { next(); restart(); });
+  document.getElementById("endorsePrev").addEventListener("click", () => { prev(); restart(); });
+  const car = document.getElementById("endorseCarousel");
+  car.addEventListener("mouseenter", () => clearInterval(timer));
+  car.addEventListener("mouseleave", start);
+  let x0 = null;
+  car.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  car.addEventListener("touchend", e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); restart(); }
+    x0 = null;
+  });
+  start();
+})();
 
 /* ── Email-capture pop-up (delayed / on scroll, once per 30 days) ───────── */
 (function emailPopup() {
